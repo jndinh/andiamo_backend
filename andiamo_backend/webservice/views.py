@@ -6,17 +6,6 @@ import json
 
 AUTHORIZATION_TOKEN = "ZNLhfFrapAOTqjcWrseVne4PBfrHkcYG"
 
-## Endpoint: index
-## Description: Endpoint used to test connection
-## Method: Any
-## Arguements: []
-## Return Structure:
-'''
-{ "Hello": "World"}
-'''
-def index(request):
-    data = {"Hello":"World"}
-    return JsonResponse(data)
 
 ## Endpoint: /login
 ## Description: Endpoint to recieve login data to login a user

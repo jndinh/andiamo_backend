@@ -70,6 +70,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'andiamo_backend.wsgi.application'
 
+ALLOWED_HOSTS = ['*']
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases

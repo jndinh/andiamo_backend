@@ -11,4 +11,8 @@ class User(models.Model):
 class Store(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
-    
+
+class Order(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    store = models.ForeignKey('Store', on_delete=models.CASCADE)
+    total = models.FloatField()

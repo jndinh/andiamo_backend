@@ -3,6 +3,7 @@ from webservice.databasefunctions import *
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import json
+import math
 
 AUTHORIZATION_TOKEN = "ZNLhfFrapAOTqjcWrseVne4PBfrHkcYG"
 
@@ -121,7 +122,7 @@ def store_locations(request):
 ## Endpoint: /place_order
 ## Description: Endpoint to handle placing an order
 ## Method: POST
-## Arguements: [user_id, order?]
+## Arguements: [user_id, latitude, longitude, total_cost]
 ## Return Structure:
 '''
 {
@@ -144,5 +145,18 @@ def place_order(request):
                 "data":"Not authorized"}
         return JsonResponse(data)
 
-    data = {"End":"Place Order"}
+    try:
+        body = request.POST.dict()
+        store = find_closest_store(float(body['latitude']), float(body['longitude']))
+        delivery_time = calc_est_deliverytime(store['distance'])
+        data = create_order(body['user_id'], store['store_id'], body['total_cost'])
+
+    except Exception as e:
+        data = {"status" : 0,
+                "data" : "Error: " + str(e)}
+
     return JsonResponse(data)
+
+def calc_est_deliverytime(dist):
+    base = 15
+    return math.floor(dist * .78 + 15)

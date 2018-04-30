@@ -48,3 +48,16 @@ def get_user(email, password):
             "lastname" : user.lname
         }
     }
+
+def get_store_locations():
+    stores = Store.objects.all()
+    locations = []
+    for i in stores:
+        loc = {"store_num" : i.id,
+               "latitude" : i.latitude,
+               "longitude" : i.longitude}
+        locations.append(loc)
+    return {
+        "status" : 1,
+        "data": locations
+    }

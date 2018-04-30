@@ -6,6 +6,17 @@ import json
 
 AUTHORIZATION_TOKEN = "ZNLhfFrapAOTqjcWrseVne4PBfrHkcYG"
 
+## Endpoint: index
+## Description: Endpoint used to test connection
+## Method: Any
+## Arguements: []
+## Return Structure:
+'''
+{ "Hello": "World"}
+'''
+def index(request):
+    data = {"Hello":"World"}
+    return JsonResponse(data)
 
 ## Endpoint: /login
 ## Description: Endpoint to recieve login data to login a user
@@ -104,7 +115,7 @@ def store_locations(request):
                 "data":"Not authorized"}
         return JsonResponse(data)
 
-    data = {"End":"Store Locations"}
+    data = get_store_locations()
     return JsonResponse(data)
 
 ## Endpoint: /place_order

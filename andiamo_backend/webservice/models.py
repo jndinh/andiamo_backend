@@ -7,3 +7,8 @@ class User(models.Model):
     password = models.CharField(max_length=128)
     fname = models.CharField(max_length=40)
     lname = models.CharField(max_length=40)
+
+class Store(models.Model):
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    

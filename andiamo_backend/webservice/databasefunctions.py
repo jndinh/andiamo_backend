@@ -2,6 +2,7 @@ from webservice.models import *
 
 import hashlib
 import math
+from datetime import datetime
 
 # checks if the user already exists. If not, attempt to create the user
 # and return the information to the view
@@ -60,14 +61,15 @@ def get_store_locations():
         locations.append(loc)
     return {
         "status" : 1,
-        "data": locations
+        "data": {
+                "locations" : locations,
+                "num_of_locations" : len(locations)
+            }
     }
 
-def create_order(user_id, store_id, total):
+def create_order(total):
     try:
-        user = User.objects.filter(user_id=user_id).first()
-        store = Store.objects.filter(id=store_id).first()
-        order = Order(user=user, store=store, total=total)
+        order = Order(total=total, timestamp=datetime.utcnow())
         order.save()
     except Exception as e:
         return {"status" : 0,
@@ -76,6 +78,18 @@ def create_order(user_id, store_id, total):
     return {"status" : 1,
             "data": {
                     "order_number":order.id
+                    }
+            }
+
+def get_order_data(order_number):
+    order = Order.objects.filter(id=order_number).first()
+    if(order is None):
+        return {"status":0,
+                "data" : "Order not found"}
+    return {"status" : 1,
+            "data":{
+                    "total": order.total,
+                    "timestamp": order.timestamp
                     }
             }
 

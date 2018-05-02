@@ -1,4 +1,5 @@
 from django.db import models
+import django.utils.timezone as time
 
 # Create your models here.
 class User(models.Model):
@@ -13,6 +14,5 @@ class Store(models.Model):
     longitude = models.FloatField()
 
 class Order(models.Model):
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
-    store = models.ForeignKey('Store', on_delete=models.CASCADE)
     total = models.FloatField()
+    timestamp = models.DateTimeField(default=time.now)

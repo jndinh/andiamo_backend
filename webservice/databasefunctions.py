@@ -1,6 +1,8 @@
 from webservice.models import *
 
 import hashlib
+import math
+from datetime import datetime
 
 # checks if the user already exists. If not, attempt to create the user
 # and return the information to the view
@@ -59,5 +61,66 @@ def get_store_locations():
         locations.append(loc)
     return {
         "status" : 1,
-        "data": locations
+        "data": {
+                "locations" : locations,
+                "num_of_locations" : len(locations)
+            }
     }
+
+def create_order(total):
+    try:
+        order = Order(total=total, timestamp=datetime.utcnow())
+        order.save()
+    except Exception as e:
+        return {"status" : 0,
+                "data" : "Error: " + str(e)}
+
+    return {"status" : 1,
+            "data": {
+                    "order_number":order.id
+                    }
+            }
+
+def get_order_data(order_number):
+    order = Order.objects.filter(id=order_number).first()
+    if(order is None):
+        return {"status":0,
+                "data" : "Order not found"}
+    return {"status" : 1,
+            "data":{
+                    "total": order.total,
+                    "timestamp": order.timestamp
+                    }
+            }
+
+def find_closest_store(latitude, longitude):
+    stores = Store.objects.all()
+    closest = stores[0]
+    dShort = calculate_distance(closest.latitude, closest.longitude, latitude, longitude)
+    for i in stores:
+        currDist = calculate_distance(i.latitude, i.longitude, latitude, longitude)
+        if dShort > currDist:
+            closest = i
+            dShort = currDist
+
+    return {"store_id" : closest.id,
+            "distance" : dShort/1000
+            }
+
+def calculate_distance(lat1, lon1, lat2, lon2):
+    earthRadius = 6371
+    dlat = degrees_to_rads(lat2 - lat1)
+    dlon = degrees_to_rads(lon2 - lon1)
+
+    lat1 = degrees_to_rads(lat1)
+    lat2 = degrees_to_rads(lon2)
+
+    a = math.sin(dlat/2) * math.sin(dlat/2) + math.sin(dlon/2) * math.sin(dlon/2) * math.cos(lat1) * math.cos(lat2)
+
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    return earthRadius * c
+
+
+
+def degrees_to_rads(degrees):
+    return degrees * (3.14159/180)

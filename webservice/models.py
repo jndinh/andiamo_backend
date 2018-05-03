@@ -1,4 +1,5 @@
 from django.db import models
+import django.utils.timezone as time
 
 # Create your models here.
 class User(models.Model):
@@ -11,4 +12,7 @@ class User(models.Model):
 class Store(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
-    
+
+class Order(models.Model):
+    total = models.FloatField()
+    timestamp = models.DateTimeField(default=time.now)

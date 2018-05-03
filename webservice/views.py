@@ -79,7 +79,7 @@ def register(request):
         return JsonResponse(data)
 
     try:
-        body = json.loads(request.body)
+        body = request.POST.dict()
         fname = body.get('fname', '')
         lname = body.get('lname', '')
         email = body.get('email', '')
@@ -102,9 +102,9 @@ def register(request):
         # Create Address
         if data['status'] == 0:
             return JsonResponse(data, content_type = "application/json", status=BAD_REQUEST)
-	
+
         user = data['user']
-        address = Address.objects.create(user=user, street_address=street_address, city=city, state=state, zip_code=zip_code) 
+        address = Address.objects.create(user=user, street_address=street_address, city=city, state=state, zip_code=zip_code)
 
 	# Optional parameter
         if line_number:
@@ -117,7 +117,7 @@ def register(request):
             "data" : {
                 "user_id" : user.user_id,
                 "firstname" : user.fname,
-                "lastname" : user.lname }  
+                "lastname" : user.lname }
         }
 
         return JsonResponse(data, content_type="application/json", status=OK)

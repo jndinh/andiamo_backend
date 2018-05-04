@@ -24,13 +24,10 @@ def create_user(email, password, firstname, lastname):
             "data" : str(e)
         }
 
+    #return user
     return {
         "status" : 1,
-        "data" : {
-            "user_id" : user.user_id,
-            "firstname" : user.fname,
-            "lastname" : user.lname
-        }
+	"user" : user
     }
 
 def get_user(email, password):

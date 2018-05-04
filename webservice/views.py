@@ -1,11 +1,17 @@
 from webservice.databasefunctions import *
-
+from webservice.models import Address
+from rest_framework.decorators import api_view
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+
 import json
 import math
 
 AUTHORIZATION_TOKEN = "ZNLhfFrapAOTqjcWrseVne4PBfrHkcYG"
+OK = 200
+UNAUTHORIZED = 401
+BAD_REQUEST = 400
+
 
 ## Endpoint: /login
 ## Description: Endpoint to recieve login data to login a user
@@ -22,6 +28,7 @@ AUTHORIZATION_TOKEN = "ZNLhfFrapAOTqjcWrseVne4PBfrHkcYG"
     }
 }
 '''
+@api_view(['POST'])
 @csrf_exempt
 def login(request):
     if request.method != "POST":
@@ -46,7 +53,7 @@ def login(request):
 ## Endpoint: /register
 ## Description: Endpoint to create a new user account
 ## Method: POST
-## Arguements: [email, password, firstname, lastname]
+## Arguements: [email, password, fname, lname, street_address, city, state, zip_code, line_number(optional)]
 ## Return Structure:
 '''
 {
@@ -58,6 +65,7 @@ def login(request):
     }
 }
 '''
+@api_view(['POST'])
 @csrf_exempt
 def register(request):
     if request.method != "POST":
@@ -71,13 +79,53 @@ def register(request):
         return JsonResponse(data)
 
     try:
-        body = request.POST.dict()
-        data = create_user(body['email'], body['password'].encode('utf-8'), body['firstname'], body['lastname'])
+        body = json.loads(request.body)
+        fname = body.get('fname', '')
+        lname = body.get('lname', '')
+        email = body.get('email', '')
+        password = body.get('password', '')
+        street_address = body.get('street_address', '')
+        city = body.get('city', '')
+        state = body.get('state', '')
+        zip_code = body.get('zip_code', '')
+
+	# Optional parameter
+        line_number = body.get('line_number', '')
+
+	# Missing parameters...
+        if not fname or not lname or not email or not password or not street_address or not city or not state or not zip_code:
+            return JsonResponse({'detail' :  'Missing parameters.', 'status' : 0}, content_type="application/json", status=BAD_REQUEST)
+
+	# Create User
+        data = create_user(email, password.encode('utf-8'), fname, lname)
+
+        # Create Address
+        if data['status'] == 0:
+            return JsonResponse(data, content_type = "application/json", status=BAD_REQUEST)
+	
+        user = data['user']
+        address = Address.objects.create(user=user, street_address=street_address, city=city, state=state, zip_code=zip_code) 
+
+	# Optional parameter
+        if line_number:
+            address.line_number = line_number
+            address.save()
+
+	# Registration done...
+        data = {
+            "status" : 1,
+            "data" : {
+                "user_id" : user.user_id,
+                "firstname" : user.fname,
+                "lastname" : user.lname }  
+        }
+
+        return JsonResponse(data, content_type="application/json", status=OK)
     except Exception as e:
         data = {"status" : 0,
                 "data" : "Error: " + str(e)}
 
-    return JsonResponse(data)
+        return JsonResponse(data)
 
 ## Endpoint: /store_locations
 ## Description: Endpoint to return all the store locations
@@ -98,6 +146,7 @@ def register(request):
     }
 }
 '''
+@api_view(['GET'])
 @csrf_exempt
 def store_locations(request):
     if request.method != "GET":
@@ -127,6 +176,7 @@ def store_locations(request):
     }
 }
 '''
+@api_view(['POST'])
 @csrf_exempt
 def place_order(request):
     if request.method != "POST":
@@ -165,6 +215,7 @@ def place_order(request):
     }
 }
 '''
+@api_view(['POST'])
 @csrf_exempt
 def get_order(request):
     if request.method != "POST":

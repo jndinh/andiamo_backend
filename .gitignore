@@ -99,3 +99,14 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# django stuff
+*~
+*.pyc
+*#
+*/migrations/0*
+
+
+
+
+

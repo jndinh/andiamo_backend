@@ -18,33 +18,41 @@ def create_user(email, password, firstname, lastname):
         hashed = hashlib.sha512(password).hexdigest()
         user = User(email=email, password=hashed, fname=firstname, lname=lastname)
         user.save()
+
+        #return user
+        return {
+            "status" : 1,
+            "user" : user
+        }
     except Exception as e:
         return {
             "status" : 0,
             "data" : str(e)
         }
 
-    #return user
-    return {
-        "status" : 1,
-	"user" : user
-    }
-
 def get_user(email, password):
     # hash to look up in DB
     hashed = hashlib.sha512(password).hexdigest()
     user = User.objects.filter(email=email, password=hashed).first()
+
     if user is None:
         return {
             "status" : 0,
             "data" : "User does not exist"
         }
+
+    address = Address.objects.filter(user=user).first()
     return {
         "status" : 1,
         "data" : {
             "user_id" : user.user_id,
             "firstname" : user.fname,
-            "lastname" : user.lname
+            "lastname" : user.lname,
+	    "street_address" : address.street_address,
+	    "city" : address.city,
+	    "state" : address.state,
+	    "zip_code" : address.zip_code,
+	    "line_number" : address.line_number
         }
     }
 

@@ -117,7 +117,7 @@ def register(request):
             "data" : {
                 "user_id" : user.user_id,
                 "firstname" : user.fname,
-                "lastname" : user.lname }  
+                "lastname" : user.lname }
         }
 
         return JsonResponse(data, content_type="application/json", status=OK)

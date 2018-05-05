@@ -79,7 +79,7 @@ def register(request):
         return JsonResponse(data)
 
     try:
-        body = request.POST.dict()
+        body = json.loads(request.body)
         fname = body.get('fname', '')
         lname = body.get('lname', '')
         email = body.get('email', '')
@@ -102,9 +102,9 @@ def register(request):
         # Create Address
         if data['status'] == 0:
             return JsonResponse(data, content_type = "application/json", status=BAD_REQUEST)
-
-        user = data['user']
-        address = Address.objects.create(user=user, street_address=street_address, city=city, state=state, zip_code=zip_code)
+	
+        user = data.get('user', '')
+        address = Address.objects.create(user=user, street_address=street_address, city=city, state=state, zip_code=zip_code) 
 
 	# Optional parameter
         if line_number:
@@ -122,10 +122,13 @@ def register(request):
 
         return JsonResponse(data, content_type="application/json", status=OK)
     except Exception as e:
+        if user:
+            user.delete()
+
         data = {"status" : 0,
                 "data" : "Error: " + str(e)}
 
-        return JsonResponse(data)
+        return JsonResponse(data, content_type="application/json", status=BAD_REQUEST)
 
 ## Endpoint: /store_locations
 ## Description: Endpoint to return all the store locations

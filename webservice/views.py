@@ -94,7 +94,7 @@ def register(request):
 
 	# Missing parameters...
         if not fname or not lname or not email or not password or not street_address or not city or not state or not zip_code:
-            return JsonResponse({'detail' :  'Missing parameters.', 'status' : 0}, content_type="application/json", status=BAD_REQUEST)
+            return JsonResponse({'data' :  'Missing parameters.', 'status' : 0}, content_type="application/json", status=BAD_REQUEST)
 
 	# Create User
         data = create_user(email, password.encode('utf-8'), fname, lname)
@@ -103,7 +103,6 @@ def register(request):
         if data['status'] == 0:
             return JsonResponse(data, content_type = "application/json", status=BAD_REQUEST)
 
-        user = None	
         user = data.get('user', '')
 
         if user:
@@ -125,11 +124,12 @@ def register(request):
 
         return JsonResponse(data, content_type="application/json", status=OK)
     except Exception as e:
-
         data = {"status" : 0,
                 "data" : "Error: " + str(e)}
 
         return JsonResponse(data, content_type="application/json", status=BAD_REQUEST)
+    else:
+       user.delete()
 
 ## Endpoint: /store_locations
 ## Description: Endpoint to return all the store locations

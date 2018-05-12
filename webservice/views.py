@@ -44,11 +44,17 @@ def login(request):
     try:
         body = request.POST.dict()
         data = get_user(body['email'], body['password'].encode('utf-8'))
+
+        if data['status'] == 0:
+            return JsonResponse(data, content_type="application/json", status=BAD_REQUEST)
+
+        return JsonResponse(data, content_type="application/json", status=200)
+
     except Exception as e:
         data = {"status" : 0,
                 "data" : "Error: " + str(e)}
+        return JsonResponse(data, content_type="application/json", status=BAD_REQUEST)
 
-    return JsonResponse(data)
 
 ## Endpoint: /register
 ## Description: Endpoint to create a new user account

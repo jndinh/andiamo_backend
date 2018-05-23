@@ -44,11 +44,17 @@ def login(request):
     try:
         body = request.POST.dict()
         data = get_user(body['email'], body['password'].encode('utf-8'))
+
+        if data['status'] == 0:
+            return JsonResponse(data, content_type="application/json", status=BAD_REQUEST)
+
+        return JsonResponse(data, content_type="application/json", status=200)
+
     except Exception as e:
         data = {"status" : 0,
                 "data" : "Error: " + str(e)}
+        return JsonResponse(data, content_type="application/json", status=BAD_REQUEST)
 
-    return JsonResponse(data)
 
 ## Endpoint: /register
 ## Description: Endpoint to create a new user account
@@ -79,7 +85,7 @@ def register(request):
         return JsonResponse(data)
 
     try:
-        body = json.loads(request.body)
+        body = json.loads(request.body.decode("utf-8"))
         fname = body.get('fname', '')
         lname = body.get('lname', '')
         email = body.get('email', '')
@@ -94,7 +100,7 @@ def register(request):
 
 	# Missing parameters...
         if not fname or not lname or not email or not password or not street_address or not city or not state or not zip_code:
-            return JsonResponse({'detail' :  'Missing parameters.', 'status' : 0}, content_type="application/json", status=BAD_REQUEST)
+            return JsonResponse({'data' :  'Missing parameters.', 'status' : 0}, content_type="application/json", status=BAD_REQUEST)
 
 	# Create User
         data = create_user(email, password.encode('utf-8'), fname, lname)
@@ -102,9 +108,11 @@ def register(request):
         # Create Address
         if data['status'] == 0:
             return JsonResponse(data, content_type = "application/json", status=BAD_REQUEST)
-	
+
         user = data.get('user', '')
-        address = Address.objects.create(user=user, street_address=street_address, city=city, state=state, zip_code=zip_code) 
+
+        if user:
+            address = Address.objects.create(user=user, street_address=street_address, city=city, state=state, zip_code=zip_code) 
 
 	# Optional parameter
         if line_number:
@@ -122,13 +130,12 @@ def register(request):
 
         return JsonResponse(data, content_type="application/json", status=OK)
     except Exception as e:
-        if user:
-            user.delete()
-
         data = {"status" : 0,
                 "data" : "Error: " + str(e)}
 
         return JsonResponse(data, content_type="application/json", status=BAD_REQUEST)
+    else:
+       user.delete()
 
 ## Endpoint: /store_locations
 ## Description: Endpoint to return all the store locations
